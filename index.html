@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>FDS OS (BETA 3)</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://picsum.photos/1280/720') no-repeat center center/cover;
+      color: white;
+    }
+    .taskbar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 40px;
+      background: #222;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+    .taskbar button {
+      margin-right: 10px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .window {
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      width: 400px;
+      background: #333;
+      border: 2px solid #111;
+      border-radius: 10px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+    }
+    .titlebar {
+      background: #111;
+      padding: 5px;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+    }
+    .titlebar span { font-weight: bold; }
+    .titlebar button {
+      background: red;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+    }
+    .content { padding: 10px; background: #444; color: white; flex: 1; }
+    #bootScreen, #updateScreen, #shutdownScreen {
+      position: fixed;
+      top:0; left:0; width:100%; height:100%;
+      display:flex; justify-content:center; align-items:center;
+      background:black; color:white; font-size:30px; z-index:9999;
+    }
+    #shutdownScreen { display:none; }
+    #updateScreen { display:none; flex-direction:column; }
+  </style>
+</head>
+<body>
+
+  <!-- Boot -->
+  <div id="bootScreen">Ligando FDS OS...</div>
+  <!-- Shutdown -->
+  <div id="shutdownScreen">Desligando...</div>
+  <!-- Update obrigatório -->
+  <div id="updateScreen">
+    <p>⚡ Uma atualização obrigatória foi liberada!</p>
+    <button onclick="finishUpdate()">Concluir Update</button>
+  </div>
+
+  <!-- Barra de tarefas -->
+  <div class="taskbar">
+    <button onclick="openApp('calc')">Calculadora</button>
+    <button onclick="openApp('nav')">Navegador</button>
+    <button onclick="openApp('notepad')">Bloco de Notas</button>
+    <button onclick="openApp('settings')">Configurações</button>
+    <button onclick="openApp('license')">Licença</button>
+    <button onclick="openApp('update')">Update</button>
+    <button onclick="shutdown()">Desligar</button>
+  </div>
+
+  <!-- Calculadora -->
+  <div id="calc" class="window">
+    <div class="titlebar"><span>Calculadora</span><button onclick="closeApp('calc')">X</button></div>
+    <div class="content">
+      <input type="text" id="calcDisplay" readonly style="width:100%; font-size:18px;"><br>
+      <div id="calcBtns"></div>
+    </div>
+  </div>
+
+  <!-- Navegador -->
+  <div id="nav" class="window">
+    <div class="titlebar"><span>Navegador</span><button onclick="closeApp('nav')">X</button></div>
+    <div class="content">
+      <input type="text" id="url" placeholder="Digite a URL" style="width:80%">
+      <button onclick="goURL()">Ir</button>
+    </div>
+  </div>
+
+  <!-- Bloco de Notas -->
+  <div id="notepad" class="window">
+    <div class="titlebar"><span>Bloco de Notas</span><button onclick="closeApp('notepad')">X</button></div>
+    <div class="content">
+      <textarea style="width:100%; height:200px;"></textarea>
+    </div>
+  </div>
+
+  <!-- Configurações -->
+  <div id="settings" class="window">
+    <div class="titlebar"><span>Configurações</span><button onclick="closeApp('settings')">X</button></div>
+    <div class="content">
+      <label>Nome do Usuário:</label><input type="text" id="username"><br>
+      <label>Chave do Produto:</label><input type="text" id="productKey"><br>
+      <button onclick="setTheme('light')\">Tema Claro</button>
+      <button onclick="setTheme('dark')\">Tema Escuro</button>
+      <button onclick="changeWallpaper()\">Trocar Papel de Parede</button>
+    </div>
+  </div>
+
+  <!-- Licença -->
+  <div id="license" class="window">
+    <div class="titlebar"><span>Termo de Licença</span><button onclick="closeApp('license')">X</button></div>
+    <div class="content">
+      <p>Este sistema FDS OS (BETA) é apenas para diversão e fins experimentais.</p>
+    </div>
+  </div>
+
+  <!-- Update -->
+  <div id="update" class="window">
+    <div class="titlebar"><span>Update</span><button onclick="closeApp('update')">X</button></div>
+    <div class="content">
+      <p>Digite a senha para liberar um update global:</p>
+      <input type="password" id="updatePass">
+      <button onclick="releaseUpdate()">Liberar Update</button>
+    </div>
+  </div>
+
+  <script>
+    // Boot inicial
+    window.onload = () => {
+      if(localStorage.getItem("updatePending") === "true"){
+        document.getElementById("bootScreen").style.display = "none";
+        document.getElementById("updateScreen").style.display = "flex";
+      } else {
+        setTimeout(()=>document.getElementById("bootScreen").style.display="none",2000);
+      }
+      buildCalc();
+    };
+
+    function openApp(id){ document.getElementById(id).style.display='flex'; }
+    function closeApp(id){ document.getElementById(id).style.display='none'; }
+
+    function shutdown(){
+      document.getElementById("shutdownScreen").style.display="flex";
+      setTimeout(()=>location.reload(),2000);
+    }
+
+    // ---- Calculadora ----
+    function buildCalc(){
+      let btns=\"789/456*123-0.=+\";
+      let out=\"\";
+      [...btns].forEach(c=>{
+        out+=`<button onclick=pressCalc('${c}')>${c}</button>`;
+      });
+      document.getElementById(\"calcBtns\").innerHTML=out;
+    }
+    function pressCalc(c){
+      let disp=document.getElementById(\"calcDisplay\");
+      if(c=='='){ disp.value=eval(disp.value); }
+      else disp.value+=c;
+    }
+
+    // ---- Navegador ----
+    function goURL(){
+      let url=document.getElementById(\"url\").value;
+      if(!url.startsWith(\"http\")) url=\"https://\"+url;
+      window.open(url,\"_blank\");
+    }
+
+    // ---- Configurações ----
+    function setTheme(mode){
+      if(mode==='light'){ document.body.style.color=\"black\"; document.body.style.backgroundColor=\"white\"; }
+      else { document.body.style.color=\"white\"; document.body.style.backgroundColor=\"black\"; }
+    }
+    function changeWallpaper(){
+      document.body.style.background=`url('https://picsum.photos/1280/720?rand=${Math.random()}') no-repeat center center/cover`;
+    }
+
+    // ---- Update ----
+    function releaseUpdate(){
+      let pass=document.getElementById(\"updatePass\").value;
+      if(pass===\"~1012FdS~\"){
+        localStorage.setItem(\"updatePending\",\"true\");
+        alert(\"Update liberado! Reinicie o sistema para aplicar.\");
+      } else {
+        alert(\"Senha incorreta!\");
+      }
+    }
+    function finishUpdate(){
+      localStorage.setItem(\"updatePending\",\"false\");
+      alert(\"Update concluído!\");
+      document.getElementById(\"updateScreen\").style.display=\"none\";
+    }
+  </script>
+</body>
+</html>

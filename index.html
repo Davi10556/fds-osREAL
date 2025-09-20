@@ -120,9 +120,9 @@
     <div class="content">
       <label>Nome do Usuário:</label><input type="text" id="username"><br>
       <label>Chave do Produto:</label><input type="text" id="productKey"><br>
-      <button onclick="setTheme('light')\">Tema Claro</button>
-      <button onclick="setTheme('dark')\">Tema Escuro</button>
-      <button onclick="changeWallpaper()\">Trocar Papel de Parede</button>
+      <button onclick="setTheme('light')">Tema Claro</button>
+      <button onclick="setTheme('dark')">Tema Escuro</button>
+      <button onclick="changeWallpaper()">Trocar Papel de Parede</button>
     </div>
   </div>
 
@@ -145,15 +145,15 @@
   </div>
 
   <script>
-    // Boot inicial
+    // Boot inicial corrigido
     window.onload = () => {
+      buildCalc();
       if(localStorage.getItem("updatePending") === "true"){
         document.getElementById("bootScreen").style.display = "none";
         document.getElementById("updateScreen").style.display = "flex";
       } else {
         setTimeout(()=>document.getElementById("bootScreen").style.display="none",2000);
       }
-      buildCalc();
     };
 
     function openApp(id){ document.getElementById(id).style.display='flex'; }
@@ -166,30 +166,30 @@
 
     // ---- Calculadora ----
     function buildCalc(){
-      let btns=\"789/456*123-0.=+\";
-      let out=\"\";
+      let btns="789/456*123-0.=+";
+      let out="";
       [...btns].forEach(c=>{
         out+=`<button onclick=pressCalc('${c}')>${c}</button>`;
       });
-      document.getElementById(\"calcBtns\").innerHTML=out;
+      document.getElementById("calcBtns").innerHTML=out;
     }
     function pressCalc(c){
-      let disp=document.getElementById(\"calcDisplay\");
+      let disp=document.getElementById("calcDisplay");
       if(c=='='){ disp.value=eval(disp.value); }
       else disp.value+=c;
     }
 
     // ---- Navegador ----
     function goURL(){
-      let url=document.getElementById(\"url\").value;
-      if(!url.startsWith(\"http\")) url=\"https://\"+url;
-      window.open(url,\"_blank\");
+      let url=document.getElementById("url").value;
+      if(!url.startsWith("http")) url="https://"+url;
+      window.open(url,"_blank");
     }
 
     // ---- Configurações ----
     function setTheme(mode){
-      if(mode==='light'){ document.body.style.color=\"black\"; document.body.style.backgroundColor=\"white\"; }
-      else { document.body.style.color=\"white\"; document.body.style.backgroundColor=\"black\"; }
+      if(mode==='light'){ document.body.style.color="black"; document.body.style.backgroundColor="white"; }
+      else { document.body.style.color="white"; document.body.style.backgroundColor="black"; }
     }
     function changeWallpaper(){
       document.body.style.background=`url('https://picsum.photos/1280/720?rand=${Math.random()}') no-repeat center center/cover`;
@@ -197,18 +197,18 @@
 
     // ---- Update ----
     function releaseUpdate(){
-      let pass=document.getElementById(\"updatePass\").value;
-      if(pass===\"~1012FdS~\"){
-        localStorage.setItem(\"updatePending\",\"true\");
-        alert(\"Update liberado! Reinicie o sistema para aplicar.\");
+      let pass=document.getElementById("updatePass").value;
+      if(pass==="~1012FdS~"){
+        localStorage.setItem("updatePending","true");
+        alert("Update liberado! Reinicie o sistema para aplicar.");
       } else {
-        alert(\"Senha incorreta!\");
+        alert("Senha incorreta!");
       }
     }
     function finishUpdate(){
-      localStorage.setItem(\"updatePending\",\"false\");
-      alert(\"Update concluído!\");
-      document.getElementById(\"updateScreen\").style.display=\"none\";
+      localStorage.setItem("updatePending","false");
+      alert("Update concluído!");
+      document.getElementById("updateScreen").style.display="none";
     }
   </script>
 </body>

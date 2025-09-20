@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>FDS OS (BETA 3)</title>
+  <title>FDS OS (BETA 4)</title>
   <style>
     body {
       margin: 0;
@@ -55,19 +55,17 @@
       font-weight: bold;
     }
     .content { padding: 10px; background: #444; color: white; flex: 1; }
-    #updateScreen, #shutdownScreen {
+    #updateScreen {
       position: fixed;
       top:0; left:0; width:100%; height:100%;
       display:none; justify-content:center; align-items:center;
       background:black; color:white; font-size:30px; z-index:9999;
+      flex-direction:column;
     }
-    #updateScreen { flex-direction:column; }
   </style>
 </head>
 <body>
 
-  <!-- Shutdown -->
-  <div id="shutdownScreen">Desligando...</div>
   <!-- Update obrigatório -->
   <div id="updateScreen">
     <p>⚡ Uma atualização obrigatória foi liberada!</p>
@@ -82,7 +80,7 @@
     <button onclick="openApp('settings')">Configurações</button>
     <button onclick="openApp('license')">Licença</button>
     <button onclick="openApp('update')">Update</button>
-    <button onclick="shutdown()">Desligar</button>
+    <button onclick="location.reload()">Desligar</button>
   </div>
 
   <!-- Calculadora -->
@@ -142,7 +140,7 @@
   </div>
 
   <script>
-    // Ao carregar, verifica se há update pendente
+    // Inicia calculadora e checa update
     window.onload = () => {
       buildCalc();
       if(localStorage.getItem("updatePending") === "true"){
@@ -152,11 +150,6 @@
 
     function openApp(id){ document.getElementById(id).style.display='flex'; }
     function closeApp(id){ document.getElementById(id).style.display='none'; }
-
-    function shutdown(){
-      document.getElementById("shutdownScreen").style.display="flex";
-      setTimeout(()=>location.reload(),2000);
-    }
 
     // ---- Calculadora ----
     function buildCalc(){
@@ -194,7 +187,7 @@
       let pass=document.getElementById("updatePass").value;
       if(pass==="~1012FdS~"){
         localStorage.setItem("updatePending","true");
-        alert("Update liberado! Reinicie o sistema para aplicar.");
+        alert("Update liberado! Ao recarregar o sistema, vai aplicar.");
       } else {
         alert("Senha incorreta!");
       }
